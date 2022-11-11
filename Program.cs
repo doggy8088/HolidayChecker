@@ -73,6 +73,12 @@ async Task<List<Holiday>> GetHolidays()
                 item.Name = DateTimeFormatInfo.CurrentInfo.DayNames[(byte)item.Date.DayOfWeek];
             }
 
+            // 軍人節只有軍人才放假，勞工不放假
+            if (item.Name == "軍人節")
+            {
+                item.IsHoliday = false;
+            }
+
             list.Add(item);
         }
 
