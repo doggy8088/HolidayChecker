@@ -8,7 +8,7 @@ using CsvHelper.TypeConversion;
 
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-Stopwatch sw = new Stopwatch();
+Stopwatch sw = new();
 
 sw.Start();
 var data = await GetHolidays();
@@ -41,7 +41,7 @@ if (holiday == null)
 
 Console.WriteLine(holiday.Dump());
 
-async Task<List<Holiday>> GetHolidays()
+static async Task<List<Holiday>> GetHolidays()
 {
     var encoding = Encoding.GetEncoding("BIG5");
 
@@ -54,41 +54,39 @@ async Task<List<Holiday>> GetHolidays()
     var client = new HttpClient();
     var url = "https://data.taipei/api/frontstage/tpeod/dataset/resource.download?rid=29d9771d-c0ee-40d4-8dfb-3866b0b7adaa";
     var stream = await client.GetStreamAsync(url);
-    using (var reader = new StreamReader(stream, encoding))
-    using (var csv = new CsvReader(reader, config))
+    using var reader = new StreamReader(stream, encoding);
+    using var csv = new CsvReader(reader, config);
+    csv.Context.RegisterClassMap<HolidayMap>();
+
+    List<Holiday> list = new();
+
+    foreach (var item in csv.GetRecords<Holiday>())
     {
-        csv.Context.RegisterClassMap<HolidayMap>();
-
-        List<Holiday> list = new();
-
-        foreach (var item in csv.GetRecords<Holiday>())
+        if (String.IsNullOrEmpty(item.Name))
         {
-            if (String.IsNullOrEmpty(item.Name))
-            {
-                item.Name = item.HolidayCategory;
-            }
-
-            if (item.Name == "星期六、星期日")
-            {
-                item.Name = DateTimeFormatInfo.CurrentInfo.DayNames[(byte)item.Date.DayOfWeek];
-            }
-
-            // 軍人節只有軍人才放假，勞工不放假
-            if (item.Name == "軍人節")
-            {
-                item.IsHoliday = false;
-            }
-
-            list.Add(item);
+            item.Name = item.HolidayCategory;
         }
 
-        return list;
+        if (item.Name == "星期六、星期日")
+        {
+            item.Name = DateTimeFormatInfo.CurrentInfo.DayNames[(byte)item.Date.DayOfWeek];
+        }
+
+        // 軍人節只有軍人才放假，勞工不放假
+        if (item.Name == "軍人節")
+        {
+            item.IsHoliday = false;
+        }
+
+        list.Add(item);
     }
+
+    return list;
 }
 
 #nullable enable
 
-public class Holiday
+class Holiday
 {
     [Display(Name = "日期")]
     public DateOnly Date { get; set; }
@@ -106,7 +104,7 @@ public class Holiday
     public string? Description { get; set; }
 }
 
-public class HolidayMap : ClassMap<Holiday>
+class HolidayMap : ClassMap<Holiday>
 {
     public HolidayMap()
     {
@@ -118,7 +116,7 @@ public class HolidayMap : ClassMap<Holiday>
     }
 }
 
-public class IsHolidayConverter : DefaultTypeConverter
+class IsHolidayConverter : DefaultTypeConverter
 {
     public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
@@ -133,7 +131,7 @@ public class IsHolidayConverter : DefaultTypeConverter
     }
 }
 
-public class DateOnlyConverter : DefaultTypeConverter
+class DateOnlyConverter : DefaultTypeConverter
 {
     public override object? ConvertFromString(string? text, IReaderRow row, MemberMapData memberMapData)
     {
