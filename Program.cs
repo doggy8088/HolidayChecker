@@ -1,12 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Globalization;
-using System.Text;
-using CsvHelper;
-using CsvHelper.Configuration;
-using CsvHelper.TypeConversion;
-
-Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+﻿Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
 Stopwatch sw = new();
 
