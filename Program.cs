@@ -33,6 +33,8 @@ if (holiday == null)
 
 Console.WriteLine(holiday.Dump());
 
+// ----------------------------------------------------------------------------
+
 static async Task<List<Holiday>> GetHolidays()
 {
     var encoding = Encoding.GetEncoding("BIG5");
