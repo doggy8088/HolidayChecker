@@ -37,8 +37,6 @@ Console.WriteLine(holiday.Dump());
 
 static async Task<List<Holiday>> GetHolidays()
 {
-    var encoding = Encoding.GetEncoding("BIG5");
-
     var config = new CsvConfiguration(CultureInfo.CurrentCulture)
     {
         Mode = CsvMode.RFC4180,
@@ -46,9 +44,9 @@ static async Task<List<Holiday>> GetHolidays()
     };
 
     var client = new HttpClient();
-    var url = "https://data.taipei/api/frontstage/tpeod/dataset/resource.download?rid=29d9771d-c0ee-40d4-8dfb-3866b0b7adaa";
+    var url = "https://data.taipei/api/frontstage/tpeod/dataset/resource.download?rid=964e936d-d971-4567-a467-aa67b930f98e";
     var stream = await client.GetStreamAsync(url);
-    using var reader = new StreamReader(stream, encoding);
+    using var reader = new StreamReader(stream);
     using var csv = new CsvReader(reader, config);
     csv.Context.RegisterClassMap<HolidayMap>();
 
@@ -82,19 +80,19 @@ static async Task<List<Holiday>> GetHolidays()
 
 class Holiday
 {
-    [Display(Name = "日期")]
+    [Display(Name = "Date")]
     public DateOnly Date { get; set; }
 
-    [Display(Name = "假日名稱")]
+    [Display(Name = "name")]
     public string? Name { get; set; }
 
-    [Display(Name = "是否為假日")]
+    [Display(Name = "isHoliday")]
     public bool IsHoliday { get; set; }
 
-    [Display(Name = "假日種類")]
+    [Display(Name = "holidayCategory")]
     public string? HolidayCategory { get; set; }
 
-    [Display(Name = "備註")]
+    [Display(Name = "description")]
     public string? Description { get; set; }
 }
 
@@ -137,7 +135,8 @@ class DateOnlyConverter : DefaultTypeConverter
         }
 
         DateOnly date;
-        if (DateOnly.TryParse(text, out date))
+        var datestr = text.Substring(0, 4) + "-" + text.Substring(4, 2) + "-" + text.Substring(6,2);
+        if (DateOnly.TryParse(datestr, out date))
         {
             return date;
         }
