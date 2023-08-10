@@ -134,9 +134,8 @@ class DateOnlyConverter : DefaultTypeConverter
             if (text == nullValue) return default(DateOnly);
         }
 
-        DateOnly date;
-        var datestr = text.Substring(0, 4) + "-" + text.Substring(4, 2) + "-" + text.Substring(6,2);
-        if (DateOnly.TryParse(datestr, out date))
+        var datestr = text.Substring(0, 4) + "-" + text.Substring(4, 2) + "-" + text.Substring(6, 2);
+        if (DateOnly.TryParse(datestr, out DateOnly date))
         {
             return date;
         }
